@@ -20,7 +20,7 @@ namespace Oxide.Plugins
 
         public CastleWarfare ()
         {
-            players = new Dictionary<ulong, Team>();
+            playerTeam = new Dictionary<ulong, Team>();
             playerCredits = new Dictionary<ulong, int>();
             itemPrice = new Dictionary<string, int>();
         }
@@ -42,6 +42,7 @@ namespace Oxide.Plugins
             {
                 saveData();
                 loadData();
+                currentState = GameState.STATE_INIT;
             }
             catch (Exception ex)
             {
@@ -52,6 +53,9 @@ namespace Oxide.Plugins
         #endregion
 
         #region Event Management
+
+        private GameState currentState;
+
 
         #endregion
 
@@ -64,7 +68,7 @@ namespace Oxide.Plugins
         #region Data Management
 
         private string dataFileName = "CastleWarfareData";  // filename in /data directory
-        private Dictionary<ulong, Team> players;            // maps player ID to Team, volatile so doesn't need persistance
+        private Dictionary<ulong, Team> playerTeam;            // maps player ID to Team, volatile so doesn't need persistance
         private Dictionary<ulong, int> playerCredits;       // maps player ID to accumulative credits/tokens amount, requires persistance
         private Dictionary<string, int> itemPrice;          // maps item to configured price, always loaded from config file in /config directory
 
@@ -110,7 +114,7 @@ namespace Oxide.Plugins
         private void ChangeCredit(BasePlayer player, int amount)
         {
             ulong playerID = player.userID;
-            if(players.ContainsKey(playerID))
+            if(playerTeam.ContainsKey(playerID))
             {
                 playerCredits[playerID] += amount;  // Positive amount = give credit, Negative amount = take credit
             }
@@ -159,6 +163,14 @@ namespace Oxide.Plugins
             ONE = 1,
             TWO,
             SPECTATOR
+        }
+        enum GameState
+        {
+            STATE_INIT,
+            STATE_LOBBY,
+            STATE_BUILD,
+            STATE_WAR,
+            STATE_END
         }
         #endregion
     }
